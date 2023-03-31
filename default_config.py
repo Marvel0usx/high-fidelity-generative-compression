@@ -22,7 +22,7 @@ class Datasets(object):
     JETS = 'jetimages'
 
 class DatasetPaths(object):
-    OPENIMAGES = 'data/openimages'
+    OPENIMAGES = '/kaggle/input/mscoco-2017/train2017/train2017'
     CITYSCAPES = ''
     JETS = ''
 
