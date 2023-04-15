@@ -54,7 +54,7 @@ class args(object):
 
     # Architecture params - defaults correspond to Table 3a) of [1]
     latent_channels = 220
-    n_residual_blocks = 9           # Authors use 9 blocks, performance saturates at 5
+    n_residual_blocks = 5           # Authors use 9 blocks, performance saturates at 5
     lambda_B = 2**(-4)              # Loose rate
     k_M = 0.075 * 2**(-5)           # Distortion
     k_P = 1.                        # Perceptual loss

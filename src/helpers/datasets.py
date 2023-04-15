@@ -20,7 +20,8 @@ NUM_DATASET_WORKERS = 4
 SCALE_MIN = 0.75
 SCALE_MAX = 0.95
 DATASETS_DICT = {"openimages": "OpenImages", "cityscapes": "CityScapes", 
-                 "jetimages": "JetImages", "evaluation": "Evaluation"}
+                 "jetimages": "JetImages", "evaluation": "Evaluation",
+                 "mscoco2017": "MSCOCO2017"}
 DATASETS = list(DATASETS_DICT.keys())
 
 def get_dataset(dataset):
@@ -193,13 +194,16 @@ class OpenImages(BaseDataset):
     """
     files = {"train": "train", "test": "test", "val": "validation"}
 
-    def __init__(self, root=os.path.join(DIR, 'data/openimages'), mode='train', crop_size=256, 
+#    def __init__(self, root=os.path.join(DIR, 'data/openimages'), mode='train', crop_size=256,
+    def __init__(self, root="/kaggle/input/mscoco-2017/train2017/train2017", mode='train', crop_size=256,
         normalize=False, **kwargs):
         super().__init__(root, [transforms.ToTensor()], **kwargs)
 
         if mode == 'train':
+            self.train_data = "/kaggle/input/mscoco-2017/train2017/train2017"
             data_dir = self.train_data
         elif mode == 'validation':
+            self.val_data = "/kaggle/input/mscoco-2017/train2017/train2017"
             data_dir = self.val_data
         else:
             raise ValueError('Unknown mode!')

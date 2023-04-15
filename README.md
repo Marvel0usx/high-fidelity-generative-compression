@@ -1,3 +1,8 @@
+# Updates
+> 2023.04.14 23:52 Updated training and validation folder location in datasets.py, changed root to /kaggle/input/mscoco-2017/train2017/train2017
+ 
+> 2023.04.14 23:52 Changed number of resblock to 5 in default_config.py
+
 # high-fidelity-generative-compression
 
 Pytorch implementation of the paper ["High-Fidelity Generative Image Compression" by Mentzer et. al.](https://hific.github.io/). This repo also provides general utilities for lossless compression that interface with Pytorch. For the official (TensorFlow) code release, see the [TensorFlow compression
