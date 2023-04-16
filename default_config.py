@@ -39,9 +39,9 @@ class args(object):
     name = 'hific_v0.1'
     silent = True
     n_epochs = 8
-    n_steps = 1e6
+    n_steps = 1
     batch_size = 8
-    log_interval = 1000
+    log_interval = 100
     save_interval = 50000
     gpu = 0
     multigpu = True
