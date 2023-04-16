@@ -442,6 +442,7 @@ class MSCOCO2017(BaseDataset):
                 scaled_W, scaled_H = math.ceil(W * scale), math.ceil(H * scale)
                 bbox = torch.tensor(self.bbox_dict[img_name])
                 mask = torch.zeros((scaled_H, scaled_W))
+                print(f"img {img_path} shape: {img.shape}, mask shape: {mask.shape}")
 
                 # random scale and convert img to tensor.
                 transform = [
