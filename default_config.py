@@ -20,11 +20,13 @@ class Datasets(object):
     OPENIMAGES = 'openimages'
     CITYSCAPES = 'cityscapes'
     JETS = 'jetimages'
+    MSCOCO2017 = 'mscoco2017'
 
 class DatasetPaths(object):
-    OPENIMAGES = '/kaggle/input/mscoco-2017/train2017/train2017'
+    OPENIMAGES = ''
     CITYSCAPES = ''
     JETS = ''
+    MSCOCO2017 = "/kaggle/input/coco-2017-dataset/coco2017"
 
 class directories(object):
     experiments = 'experiments'
