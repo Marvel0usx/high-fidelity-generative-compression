@@ -366,7 +366,7 @@ class MSCOCO2017(BaseDataset):
                 if f_name in self.bbox_dict:
                     self.bbox_dict[f_name].append(coord)
                 else:
-                    self.bbox_dict[f_name] = coord
+                    self.bbox_dict[f_name] = [coord]
 
         self.imgs = glob.glob(os.path.join(data_dir, '*.jpg'))
         self.imgs += glob.glob(os.path.join(data_dir, '*.png'))
