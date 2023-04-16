@@ -478,7 +478,10 @@ class MSCOCO2017(BaseDataset):
                 transformed = dynamic_transform(img)
                 mask = torch.zeros((self.crop_size, self.crop_size)).bool()
 
-        except:
+        except Exception as e:
+            print("*" * 60)
+            print(e)
+            print("*" * 60)
             return None
 
         # apply random scaling + crop, put each pixel
