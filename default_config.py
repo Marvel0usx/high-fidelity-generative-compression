@@ -26,8 +26,8 @@ class DatasetPaths(object):
     OPENIMAGES = ''
     CITYSCAPES = ''
     JETS = ''
-    # MSCOCO2017 = "/kaggle/input/coco-2017-dataset/coco2017"
-    MSCOCO2017 = r"D:\UofT\CSC413\Project\mscoco"
+    MSCOCO2017 = "/kaggle/input/coco-2017-dataset/coco2017"
+    # MSCOCO2017 = r"D:\UofT\CSC413\Project\mscoco"
 
 class directories(object):
     experiments = 'experiments'
