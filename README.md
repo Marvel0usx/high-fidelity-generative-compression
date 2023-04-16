@@ -1,4 +1,6 @@
 # Updates
+> 2023.04.16 09:10 Updated dataloader in datasets.py.
+
 > 2023.04.14 23:52 Updated training and validation folder location in datasets.py, changed root to /kaggle/input/mscoco-2017/train2017/train2017
  
 > 2023.04.14 23:52 Changed number of resblock to 5 in default_config.py

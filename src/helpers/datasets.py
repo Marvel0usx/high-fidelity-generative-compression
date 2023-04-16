@@ -4,6 +4,7 @@ import glob
 import math
 import logging
 import numpy as np
+import random
 
 from skimage.io import imread
 import PIL
@@ -335,3 +336,123 @@ def preprocess(root, size=(64, 64), img_format='JPEG', center_crop=None):
             img.crop((left, top, right, bottom))
 
         img.save(img_path, img_format)
+
+class MSCOCO2017(BaseDataset):
+    """
+    MSCOCO2017 dataset with labelled bounding boxes.
+    """
+    files = {
+        "train": "train2017",
+        "test" : "test2017",
+        "val"  : "val2017",
+        "bbox" : r"D:\UofT\CSC413\Project\coco-faces"
+    }
+    def __init__(self, root=r"D:\UofT\CSC413\Project\mscoco", mode="train", crop_size=256,
+                    normalize=False, **kwargs):
+        super().__init__(root, [transforms.ToTensor()], **kwargs)
+
+        if mode == 'train':
+            data_dir = self.train_data
+            self.bbox_file = self.files["bbox"] + "train2017.txt"
+        elif mode == 'validation':
+            data_dir = self.val_data
+            self.bbox_file = self.files["bbox"] + "val2017.txt"
+        else:
+            raise ValueError('Unknown mode!')
+
+        # Parse bounding box data from file.
+        with open(self.bbox_file, "r") as fin:
+            self.bbox_dict = dict()
+            lines = fin.readline()
+            for line in lines:
+                f_name, *coord = line.rstrip().split(" ")
+                coord = tuple(map(float, coord))
+                if f_name in self.bbox_dict:
+                    self.bbox_dict[f_name].append(coord)
+                else:
+                    self.bbox_dict[f_name] = coord
+
+        self.imgs = glob.glob(os.path.join(data_dir, '*.jpg'))
+        self.imgs += glob.glob(os.path.join(data_dir, '*.png'))
+
+        self.crop_size = crop_size
+        self.image_dims = (3, self.crop_size, self.crop_size)
+        self.scale_min = SCALE_MIN
+        self.scale_max = SCALE_MAX
+        self.normalize = normalize
+
+    def _transforms(self, scale, H, W):
+        """
+        Up(down)scale and randomly crop to `crop_size` x `crop_size`
+
+        For fine-tuning this model for human faces, we retrieve bounding box information
+        by the index of the image, randomly select a bounding box, and crop around the
+        center of that bbox.
+        """
+
+        transforms_list = [  # transforms.ToPILImage(),
+            transforms.RandomHorizontalFlip(),
+            transforms.Resize((math.ceil(scale * H), math.ceil(scale * W))),
+            transforms.RandomCrop(self.crop_size),
+            transforms.ToTensor()]
+
+        if self.normalize is True:
+            transforms_list += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+
+        return transforms.Compose(transforms_list)
+
+    def __getitem__(self, idx):
+        """ TODO: This definitely needs to be optimized.
+        Get the image of `idx`
+
+        Return
+        ------
+        sample : torch.Tensor
+            Tensor in [0.,1.] of shape `img_size`.
+
+        roi_mask : torch.Tensor
+            Tensor in bool, the Region of Interest.
+
+        For fine-tuning this model for human faces, we retrieve bounding box information
+        by the index of the image, randomly select a bounding box, and crop around the
+        center of that bbox.
+        """
+
+        # img values already between 0 and 255
+        img_path = self.imgs[idx]
+        img_name = os.path.basename(img_path)
+        filesize = os.path.getsize(img_path)
+        try:
+            # This is faster but less convenient
+            # H X W X C `ndarray`
+            # img = imread(img_path)
+            # img_dims = img.shape
+            # H, W = img_dims[0], img_dims[1]
+            # PIL
+            img = PIL.Image.open(img_path)
+            img = img.convert('RGB')
+            W, H = img.size  # slightly confusing
+            bpp = filesize * 8. / (H * W)
+
+            shortest_side_length = min(H, W)
+
+            minimum_scale_factor = float(self.crop_size) / float(shortest_side_length)
+            scale_low = max(minimum_scale_factor, self.scale_min)
+            scale_high = max(scale_low, self.scale_max)
+            scale = np.random.uniform(scale_low, scale_high)
+
+            if img_name in self.bbox_dict:
+                # (TODO)
+                pass
+
+            else:  # no ROI, do the normal transform.
+                dynamic_transform = self._transforms(scale, H, W, idx)
+                transformed = dynamic_transform(img)
+                mask = torch.zeros((self.crop_size, self.crop_size)).bool()
+
+        except:
+            return None
+
+        # apply random scaling + crop, put each pixel
+        # in [0.,1.] and reshape to (C x H x W)
+        return transformed, bpp, mask
