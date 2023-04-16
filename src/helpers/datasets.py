@@ -443,6 +443,7 @@ class MSCOCO2017(BaseDataset):
                 bbox = torch.tensor(self.bbox_dict[img_name])
                 mask = torch.zeros((scaled_H, scaled_W))
 
+
                 # random scale and convert img to tensor.
                 transform = [
                     transforms.Resize((scaled_H, scaled_W)),
@@ -452,7 +453,7 @@ class MSCOCO2017(BaseDataset):
                     transform.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
 
                 img = transforms.Compose(transform)(img)
-
+                print(f"img {img_path} shape: {img.shape}, mask shape: {mask.shape}")
                 # scale x-coord of bbox
                 bbox[:, (0, 2)] *= scaled_W
                 # scale y-coord of bbox
