@@ -485,7 +485,7 @@ class MSCOCO2017(BaseDataset):
             print("*" * 60)
             return None
 
-        print(f"img {img_path} shape: {transformed.shape}, mask shape: {mask.shape}")
+        print(f"img {img_path} shape: {transformed.shape}, mask shape: {mask.shape}, scale: {scaled_H}x{scaled_W}")
 
         # apply random scaling + crop, put each pixel
         # in [0.,1.] and reshape to (C x H x W)
