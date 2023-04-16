@@ -442,8 +442,39 @@ class MSCOCO2017(BaseDataset):
             scale = np.random.uniform(scale_low, scale_high)
 
             if img_name in self.bbox_dict:
-                # (TODO)
-                pass
+                bbox = torch.tensor(self.bbox_dict[img_name])
+                mask = torch.zeros((W * scale, H * scale))
+
+                # random scale and convert img to tensor.
+                transform = [
+                    transforms.Resize((math.ceil(scale * H), math.ceil(scale * W))),
+                    transforms.ToTensor()
+                ]
+                if self.normalize:
+                    transform.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+
+                img = transforms.Compose(transform)(img)
+
+                # scale x-coord of bbox
+                bbox[:, (0, 2)] *= W * scale
+                # scale y-coord of bbox
+                bbox[:, (1, 3)] *= H * scale
+
+                # (x1, y1) upper-left corner of face rectangle, (x2, y2) - lower-right corner
+                for (x1, y1, x2, y2) in bbox:
+                    mask[x1: x2, y1: y2] = 1
+
+                # random horizontal flip with p=0.5
+                if random.random() <= 0.5:
+                    img = torch.flip(img, dims=(2,))
+                    mask = torch.flip(mask, dims=(1,))
+
+                # random crop the image, does not go over the picture dims.
+                start_x, start_y = random.randint(0, H * scale - self.crop_size), \
+                                   random.randint(0, W * scale - self.crop_size)
+                end_x, end_y = start_x + self.crop_size, start_y + self.crop_size
+                transformed = img[:, start_y:end_y, start_x:end_x]
+                mask = mask[start_y:end_y, start_x:end_x]
 
             else:  # no ROI, do the normal transform.
                 dynamic_transform = self._transforms(scale, H, W, idx)
