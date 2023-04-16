@@ -460,7 +460,7 @@ class MSCOCO2017(BaseDataset):
 
                 # (x1, y1) upper-left corner of face rectangle, (x2, y2) - lower-right corner
                 for (x1, y1, x2, y2) in bbox:
-                    mask[x1: x2, y1: y2] = 1
+                    mask[int(x1): int(x2), int(y1): int(y2)] = 1
 
                 # random horizontal flip with p=0.5
                 if random.random() <= 0.5:
