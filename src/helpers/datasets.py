@@ -452,7 +452,6 @@ class MSCOCO2017(BaseDataset):
                     transform.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
 
                 img = transforms.Compose(transform)(img)
-                print(f"img {img_path} shape: {img.shape}, mask shape: {mask.shape}\n")
                 # scale x-coord of bbox
                 bbox[:, (0, 2)] *= scaled_W
                 # scale y-coord of bbox
@@ -473,7 +472,7 @@ class MSCOCO2017(BaseDataset):
                 end_x, end_y = start_x + self.crop_size, start_y + self.crop_size
 
 
-                print(f"start and end :{start_x}, {start_y}, {end_x}, {end_y}\n")
+                print(f"start and end {img_path} :{start_x}, {start_y}, {end_x}, {end_y}\n")
 
                 transformed = img[:, start_y:end_y, start_x:end_x]
                 mask = mask[start_y:end_y, start_x:end_x].bool()
