@@ -473,7 +473,7 @@ class MSCOCO2017(BaseDataset):
                 end_x, end_y = start_x + self.crop_size, start_y + self.crop_size
                 transformed = img[:, start_y:end_y, start_x:end_x]
                 mask = mask[start_y:end_y, start_x:end_x].bool()
-
+                print(f"img {img_path} shape: {transformed.shape}, mask shape: {mask.shape}, scale: {scaled_H}x{scaled_W}")
             else:  # no ROI, do the normal transform.
                 dynamic_transform = self._transforms(scale, H, W)
                 transformed = dynamic_transform(img)
@@ -484,8 +484,6 @@ class MSCOCO2017(BaseDataset):
             print(e)
             print("*" * 60)
             return None
-
-        print(f"img {img_path} shape: {transformed.shape}, mask shape: {mask.shape}, scale: {scaled_H}x{scaled_W}")
 
         # apply random scaling + crop, put each pixel
         # in [0.,1.] and reshape to (C x H x W)
