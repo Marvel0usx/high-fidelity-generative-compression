@@ -195,8 +195,7 @@ class OpenImages(BaseDataset):
     """
     files = {"train": "train", "test": "test", "val": "validation"}
 
-   def __init__(self, root=os.path.join(DIR, 'data/openimages'), mode='train', crop_size=256,
-        normalize=False, **kwargs):
+   def __init__(self, root=os.path.join(DIR, 'data/openimages'), mode='train', crop_size=256, normalize=False, **kwargs):
         super().__init__(root, [transforms.ToTensor()], **kwargs)
 
         if mode == 'train':
