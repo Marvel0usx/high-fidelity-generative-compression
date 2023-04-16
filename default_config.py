@@ -44,8 +44,8 @@ class args(object):
     save_interval = 50000
     gpu = 0
     multigpu = True
-    dataset = Datasets.OPENIMAGES
-    dataset_path = DatasetPaths.OPENIMAGES
+    dataset = Datasets.MSCOCO2017
+    dataset_path = DatasetPaths.MSCOCO2017
     shuffle = True
 
     # GAN params
