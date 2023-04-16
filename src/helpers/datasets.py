@@ -452,7 +452,7 @@ class MSCOCO2017(BaseDataset):
                     transform.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
 
                 img = transforms.Compose(transform)(img)
-                print(f"img {img_path} shape: {img.shape}, mask shape: {mask.shape}")
+                print(f"img {img_path} shape: {img.shape}, mask shape: {mask.shape}\n")
                 # scale x-coord of bbox
                 bbox[:, (0, 2)] *= scaled_W
                 # scale y-coord of bbox
@@ -471,9 +471,13 @@ class MSCOCO2017(BaseDataset):
                 start_x, start_y = random.randint(0, scaled_H - self.crop_size), \
                                    random.randint(0, scaled_W - self.crop_size)
                 end_x, end_y = start_x + self.crop_size, start_y + self.crop_size
+
+
+                print(f"start and end :{start_x}, {start_y}, {end_x}, {end_y}\n")
+
                 transformed = img[:, start_y:end_y, start_x:end_x]
                 mask = mask[start_y:end_y, start_x:end_x].bool()
-                print(f"img {img_path} shape: {transformed.shape}, mask shape: {mask.shape}, scale: {scaled_H}x{scaled_W}")
+                print(f"img {img_path} shape: {transformed.shape}, mask shape: {mask.shape}, scale: {scaled_H}x{scaled_W}\n")
             else:  # no ROI, do the normal transform.
                 dynamic_transform = self._transforms(scale, H, W)
                 transformed = dynamic_transform(img)
