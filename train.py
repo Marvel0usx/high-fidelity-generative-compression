@@ -156,10 +156,10 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
                                 best_loss, start_time, epoch_start_time, batch_size=data.shape[0],
                                 avg_bpp=bpp.mean().item(), logger=logger, writer=train_writer)
                 try:
-                    test_data, test_bpp = test_loader_iter.next()
+                    test_data, test_bpp, test_mask = test_loader_iter.next()
                 except StopIteration:
                     test_loader_iter = iter(test_loader)
-                    test_data, test_bpp = test_loader_iter.next()
+                    test_data, test_bpp, test_mask = test_loader_iter.next()
 
                 best_test_loss, epoch_test_loss = test(args, model, epoch, idx, data, test_data, test_bpp, device, epoch_test_loss, storage_test,
                      best_test_loss, start_time, epoch_start_time, logger, train_writer, test_writer)

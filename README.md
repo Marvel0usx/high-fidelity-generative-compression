@@ -1,5 +1,5 @@
 # Updates
-> 2023.04.16 12:14 Mask passed to train.py:114
+> 2023.04.16 12:14 Mask passed to train.py:114, 159, 162
 
 > 2023.04.16 09:10 Updated dataloader in datasets.py.
 

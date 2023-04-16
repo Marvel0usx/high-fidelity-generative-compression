@@ -342,6 +342,7 @@ class MSCOCO2017(BaseDataset):
         "test" : "test2017",
         "val"  : "val2017",
         "bbox" : r"/kaggle/input/mscoco2017-face-bbox/"
+        # "bbox" : r"D:\\UofT\\CSC413\\Project\\coco-faces\\"
     }
     def __init__(self, root=r"/kaggle/input/coco-2017-dataset/coco2017", mode="train", crop_size=256,
                     normalize=False, **kwargs):
@@ -359,7 +360,7 @@ class MSCOCO2017(BaseDataset):
         # Parse bounding box data from file.
         with open(self.bbox_file, "r") as fin:
             self.bbox_dict = dict()
-            lines = fin.readline()
+            lines = fin.readlines()
             for line in lines:
                 f_name, *coord = line.rstrip().split(" ")
                 coord = tuple(map(float, coord))
@@ -473,7 +474,7 @@ class MSCOCO2017(BaseDataset):
                 mask = mask[start_y:end_y, start_x:end_x].bool()
 
             else:  # no ROI, do the normal transform.
-                dynamic_transform = self._transforms(scale, H, W, idx)
+                dynamic_transform = self._transforms(scale, H, W)
                 transformed = dynamic_transform(img)
                 mask = torch.zeros((self.crop_size, self.crop_size)).bool()
 
