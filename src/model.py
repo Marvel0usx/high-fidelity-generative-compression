@@ -198,7 +198,7 @@ class Model(nn.Module):
         LPIPS_loss = self.perceptual_loss.forward(x_gen, x_real, normalize=normalize)
         return torch.mean(LPIPS_loss)
 
-    def compression_loss(self, intermediates, hyperinfo):
+    def compression_loss(self, intermediates, hyperinfo, mask):
         
         x_real = intermediates.input_image
         x_gen = intermediates.reconstruction
@@ -211,7 +211,10 @@ class Model(nn.Module):
         distortion_loss = self.distortion_loss(x_gen, x_real)
         perceptual_loss = self.perceptual_loss_wrapper(x_gen, x_real, normalize=True)
 
-        weighted_distortion = self.args.k_M * distortion_loss
+        mask_distortion = self.distortion_loss(x_gen * mask, x_real * mask)
+
+        # TODO: args.k_M?
+        weighted_distortion = self.args.k_M * distortion_loss + 10 * self.args.k_M * mask_distortion
         weighted_perceptual = self.args.k_P * perceptual_loss
 
         weighted_rate, rate_penalty = losses.weighted_rate_loss(self.args, total_nbpp=intermediates.n_bpp,
@@ -343,7 +346,7 @@ class Model(nn.Module):
 
         return reconstruction
 
-    def forward(self, x, train_generator=False, return_intermediates=False, writeout=True):
+    def forward(self, x, mask, train_generator=False, return_intermediates=False, writeout=True):
 
         self.writeout = writeout
 
@@ -365,7 +368,7 @@ class Model(nn.Module):
             reconstruction = torch.clamp(reconstruction, min=0., max=1.)
             return reconstruction, intermediates.q_bpp
 
-        compression_model_loss = self.compression_loss(intermediates, hyperinfo)
+        compression_model_loss = self.compression_loss(intermediates, hyperinfo, mask)
 
         if self.use_discriminator is True:
             # Only send gradients to generator when training generator via

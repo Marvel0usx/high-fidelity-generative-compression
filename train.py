@@ -58,19 +58,19 @@ def optimize_compression_loss(compression_loss, amortization_opt, hyperlatent_li
     amortization_opt.zero_grad()
     hyperlatent_likelihood_opt.zero_grad()
 
-def test(args, model, epoch, idx, data, test_data, test_bpp, device, epoch_test_loss, storage, best_test_loss, 
+def test(args, model, epoch, idx, data, test_data, test_mask, test_bpp, device, epoch_test_loss, storage, best_test_loss, 
          start_time, epoch_start_time, logger, train_writer, test_writer):
 
     model.eval()  
     with torch.no_grad():
         data = data.to(device, dtype=torch.float)
 
-        losses, intermediates = model(data, return_intermediates=True, writeout=False)
+        losses, intermediates = model(data, test_mask, return_intermediates=True, writeout=False)
         utils.save_images(train_writer, model.step_counter, intermediates.input_image, intermediates.reconstruction,
             fname=os.path.join(args.figures_save, 'recon_epoch{}_idx{}_TRAIN_{:%Y_%m_%d_%H:%M}.jpg'.format(epoch, idx, datetime.datetime.now())))
 
         test_data = test_data.to(device, dtype=torch.float)
-        losses, intermediates = model(test_data, return_intermediates=True, writeout=True)
+        losses, intermediates = model(test_data, test_mask, return_intermediates=True, writeout=True)
         utils.save_images(test_writer, model.step_counter, intermediates.input_image, intermediates.reconstruction,
             fname=os.path.join(args.figures_save, 'recon_epoch{}_idx{}_TEST_{:%Y_%m_%d_%H:%M}.jpg'.format(epoch, idx, datetime.datetime.now())))
     
@@ -117,7 +117,7 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
             try:
                 if model.use_discriminator is True:
                     # Train D for D_steps, then G, using distinct batches
-                    losses = model(data, train_generator=train_generator)
+                    losses = model(data, mask, train_generator=train_generator)
                     compression_loss = losses['compression']
                     disc_loss = losses['disc']
 
@@ -135,7 +135,7 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
                         continue
                 else:
                     # Rate, distortion, perceptual only
-                    losses = model(data, train_generator=True)
+                    losses = model(data, mask, train_generator=True)
                     compression_loss = losses['compression']
                     optimize_compression_loss(compression_loss, amortization_opt, hyperlatent_likelihood_opt)
 
@@ -161,7 +161,7 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
                     test_loader_iter = iter(test_loader)
                     test_data, test_bpp, test_mask = test_loader_iter.next()
 
-                best_test_loss, epoch_test_loss = test(args, model, epoch, idx, data, test_data, test_bpp, device, epoch_test_loss, storage_test,
+                best_test_loss, epoch_test_loss = test(args, model, epoch, idx, data, test_data, test_mask, test_bpp, device, epoch_test_loss, storage_test,
                      best_test_loss, start_time, epoch_start_time, logger, train_writer, test_writer)
 
                 with open(os.path.join(args.storage_save, 'storage_{}_tmp.pkl'.format(args.name)), 'wb') as handle:
