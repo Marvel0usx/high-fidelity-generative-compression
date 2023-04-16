@@ -195,16 +195,13 @@ class OpenImages(BaseDataset):
     """
     files = {"train": "train", "test": "test", "val": "validation"}
 
-#    def __init__(self, root=os.path.join(DIR, 'data/openimages'), mode='train', crop_size=256,
-    def __init__(self, root="/kaggle/input/mscoco-2017/train2017/train2017", mode='train', crop_size=256,
+   def __init__(self, root=os.path.join(DIR, 'data/openimages'), mode='train', crop_size=256,
         normalize=False, **kwargs):
         super().__init__(root, [transforms.ToTensor()], **kwargs)
 
         if mode == 'train':
-            self.train_data = "/kaggle/input/mscoco-2017/train2017/train2017"
             data_dir = self.train_data
         elif mode == 'validation':
-            self.val_data = "/kaggle/input/mscoco-2017/train2017/train2017"
             data_dir = self.val_data
         else:
             raise ValueError('Unknown mode!')
@@ -345,18 +342,18 @@ class MSCOCO2017(BaseDataset):
         "train": "train2017",
         "test" : "test2017",
         "val"  : "val2017",
-        "bbox" : r"D:\UofT\CSC413\Project\coco-faces"
+        "bbox" : r"/kaggle/input/mscoco2017-face-bbox/"
     }
-    def __init__(self, root=r"D:\UofT\CSC413\Project\mscoco", mode="train", crop_size=256,
+    def __init__(self, root=r"/kaggle/input/coco-2017-dataset/coco2017", mode="train", crop_size=256,
                     normalize=False, **kwargs):
         super().__init__(root, [transforms.ToTensor()], **kwargs)
 
         if mode == 'train':
             data_dir = self.train_data
-            self.bbox_file = self.files["bbox"] + "train2017.txt"
+            self.bbox_file = self.files["bbox"] + r"train2017.txt"
         elif mode == 'validation':
             data_dir = self.val_data
-            self.bbox_file = self.files["bbox"] + "val2017.txt"
+            self.bbox_file = self.files["bbox"] + r"val2017.txt"
         else:
             raise ValueError('Unknown mode!')
 
@@ -474,7 +471,7 @@ class MSCOCO2017(BaseDataset):
                                    random.randint(0, W * scale - self.crop_size)
                 end_x, end_y = start_x + self.crop_size, start_y + self.crop_size
                 transformed = img[:, start_y:end_y, start_x:end_x]
-                mask = mask[start_y:end_y, start_x:end_x]
+                mask = mask[start_y:end_y, start_x:end_x].bool()
 
             else:  # no ROI, do the normal transform.
                 dynamic_transform = self._transforms(scale, H, W, idx)
