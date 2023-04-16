@@ -439,12 +439,13 @@ class MSCOCO2017(BaseDataset):
             scale = np.random.uniform(scale_low, scale_high)
 
             if img_name in self.bbox_dict:
+                scaled_W, scaled_H = math.ceil(W * scale), math.ceil(H * scale)
                 bbox = torch.tensor(self.bbox_dict[img_name])
-                mask = torch.zeros((W * scale, H * scale))
+                mask = torch.zeros((scaled_H, scaled_W))
 
                 # random scale and convert img to tensor.
                 transform = [
-                    transforms.Resize((math.ceil(scale * H), math.ceil(scale * W))),
+                    transforms.Resize((scaled_H, scaled_W)),
                     transforms.ToTensor()
                 ]
                 if self.normalize:
@@ -453,9 +454,9 @@ class MSCOCO2017(BaseDataset):
                 img = transforms.Compose(transform)(img)
 
                 # scale x-coord of bbox
-                bbox[:, (0, 2)] *= W * scale
+                bbox[:, (0, 2)] *= scaled_W
                 # scale y-coord of bbox
-                bbox[:, (1, 3)] *= H * scale
+                bbox[:, (1, 3)] *= scaled_H
 
                 # (x1, y1) upper-left corner of face rectangle, (x2, y2) - lower-right corner
                 for (x1, y1, x2, y2) in bbox:
@@ -467,8 +468,8 @@ class MSCOCO2017(BaseDataset):
                     mask = torch.flip(mask, dims=(1,))
 
                 # random crop the image, does not go over the picture dims.
-                start_x, start_y = random.randint(0, H * scale - self.crop_size), \
-                                   random.randint(0, W * scale - self.crop_size)
+                start_x, start_y = random.randint(0, scaled_H - self.crop_size), \
+                                   random.randint(0, scaled_W - self.crop_size)
                 end_x, end_y = start_x + self.crop_size, start_y + self.crop_size
                 transformed = img[:, start_y:end_y, start_x:end_x]
                 mask = mask[start_y:end_y, start_x:end_x].bool()
