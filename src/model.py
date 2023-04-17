@@ -216,7 +216,7 @@ class Model(nn.Module):
             cols = mask[i].sum(dim=0) != 0
             x_gen_cut = x_gen_masked[:, i][:, rows][:, :, cols]
             x_real_cut = x_real_masked[:, i][:, rows][:, :, cols]
-            ssims.append(1 - ssim(x_gen_cut, x_real_cut, channel_axis=0))
+            ssims.append(1 - ssim(x_gen_cut, x_real_cut, multichannel=True, channel_axis=0))
         ssims_lost = torch.mean(torch.Tensor(ssims))
         return masked_distortion + self.args.k_SSIM * ssims_lost
 
