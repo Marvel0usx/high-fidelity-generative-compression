@@ -204,9 +204,11 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
     args.ckpt = ckpt_path
     logger.info("Training complete. Time elapsed: {:.3f} s. Number of steps: {}".format((time.time()-start_time), model.step_counter))
 
-    import pickle
-    with open("\kaggle\working\loss.pickle", "wb") as fout:
-        pickle.dump(loss_list, fout)
+    try:
+        with open("\kaggle\working\loss.pickle", "wb") as fout:
+            pickle.dump(loss_list, fout)
+    except Exception as e:
+        print("CNM!")
 
     return model, ckpt_path
 
