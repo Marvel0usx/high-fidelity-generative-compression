@@ -65,7 +65,6 @@ def test(args, model, epoch, idx, data, test_data, test_mask, test_bpp, device, 
     with torch.no_grad():
         data = data.to(device, dtype=torch.float)
         test_mask = test_mask.to(device, dtype=torch.float)
-        print(("C" * 40) + " test: ", test_mask.shape)
 
         losses, intermediates = model(data, test_mask, return_intermediates=True, writeout=False)
         utils.save_images(train_writer, model.step_counter, intermediates.input_image, intermediates.reconstruction,
@@ -115,9 +114,8 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
 
         for idx, (data, bpp, mask) in enumerate(tqdm(train_loader, desc='Train', position=0, leave=True), 0):
             data = data.to(device, dtype=torch.float)
-            mask = data.to(device, dtype=torch.float)
-            print("B" * 39, f"{mask.shape}")
-            
+            mask = mask.to(device, dtype=torch.float)
+
             try:
                 if model.use_discriminator is True:
                     # Train D for D_steps, then G, using distinct batches
