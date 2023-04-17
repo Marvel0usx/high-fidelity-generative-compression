@@ -476,7 +476,8 @@ class MSCOCO2017(BaseDataset):
 
                 transformed = img[:, start_x:end_x, start_y:end_y]
                 mask = mask[start_x:end_x, start_y:end_y]
-                # print(f"img {img_path} shape: {transformed.shape}, mask shape: {mask.shape}, scale: {scaled_H}x{scaled_W}\n")
+                print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                print(f"img {img_path} shape: {transformed.shape}, mask shape: {mask.shape}, scale: {scaled_H}x{scaled_W}\n")
             else:  # no ROI, do the normal transform.
                 dynamic_transform = self._transforms(scale, H, W)
                 transformed = dynamic_transform(img)
