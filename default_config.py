@@ -41,7 +41,7 @@ class args(object):
     n_epochs = 8
     n_steps = 1
     batch_size = 8
-    log_interval = 100
+    log_interval = 512
     save_interval = 50000
     gpu = 0
     multigpu = True
@@ -60,7 +60,8 @@ class args(object):
     n_residual_blocks = 9           # Authors use 9 blocks, performance saturates at 5
     lambda_B = 2**(-4)              # Loose rate
     k_M = 0.075 * 2**(-5)           # Distortion
-    k_Mask = 10
+    # TODO: tuning
+    k_Mask = 1000
     k_P = 1.                        # Perceptual loss
     beta = 0.15                     # Generator loss
     use_channel_norm = True
@@ -78,7 +79,8 @@ class args(object):
 
     # Scheduling
     lambda_schedule = dict(vals=[2., 1.], steps=[50000])
-    lr_schedule = dict(vals=[1., 0.1], steps=[500000])
+    # TODO: tuning
+    lr_schedule = dict(vals=[0.5, 0.1], steps=[500000])
     target_schedule = dict(vals=[0.20/0.14, 1.], steps=[50000])  # Rate allowance
     ignore_schedule = False
 

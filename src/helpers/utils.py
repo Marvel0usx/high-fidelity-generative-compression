@@ -244,6 +244,8 @@ def load_model(save_path, logger, device, model_type=None, model_mode=None, curr
 
         if model.use_discriminator is True:
             discriminator_parameters = model.Discriminator.parameters()
+            # TODO: check validity
+            discriminator_parameters.requires_grad = False
             disc_opt = torch.optim.Adam(discriminator_parameters, lr=args.learning_rate)
             optimizers['disc'] = disc_opt
             
