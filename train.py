@@ -111,7 +111,7 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
         
         model.train()
 
-        for idx, (data, bpp, mask) in enumerate(tqdm(train_loader, desc='Train'), 0):
+        for idx, (data, bpp, mask) in enumerate(tqdm(train_loader, desc='Train', position=0), 0):
             data = data.to(device, dtype=torch.float)
             
             try:
