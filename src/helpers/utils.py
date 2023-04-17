@@ -250,13 +250,13 @@ def load_model(save_path, logger, device, model_type=None, model_mode=None, curr
         if args.sample_noise is True:
             optimizers['amort'].add_param_group({'params': list(model.Generator.latent_noise_map.parameters())})
         
-        optimizers['amort'].load_state_dict(checkpoint['compression_optimizer_state_dict'])
-        optimizers['hyper'].load_state_dict(checkpoint['hyperprior_optimizer_state_dict'])
-        if (model.use_discriminator is True) and ('disc' in optimizers.keys()):
-            try:
-                optimizers['disc'].load_state_dict(checkpoint['discriminator_optimizer_state_dict'])
-            except KeyError:
-                pass
+        # optimizers['amort'].load_state_dict(checkpoint['compression_optimizer_state_dict'])
+        # optimizers['hyper'].load_state_dict(checkpoint['hyperprior_optimizer_state_dict'])
+        # if (model.use_discriminator is True) and ('disc' in optimizers.keys()):
+        #     try:
+        #         optimizers['disc'].load_state_dict(checkpoint['discriminator_optimizer_state_dict'])
+        #     except KeyError:
+        #         pass
 
         model.train()
 
