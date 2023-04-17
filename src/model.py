@@ -202,12 +202,12 @@ class Model(nn.Module):
         return torch.mean(LPIPS_loss)
 
     def masked_loss(self, x_gen, x_real, mask):
-        x_gen_masked = x_gen.transpose(0,1) * mask
-        x_real_masked = x_real.transpose(0,1) * mask
+        x_gen_masked = x_gen.transpose(0, 1) * mask
+        x_real_masked = x_real.transpose(0, 1) * mask
 
         sq_err = self.squared_difference(x_gen_masked * 255., x_real_masked * 255.).transpose(0, 1)
         err_sum = sq_err.sum(dim=3).sum(dim=2).sum(dim=1)
-        mask_size = mask.sum(dim=2).sum(dim=1)
+        mask_size = mask.sum(dim=2).sum(dim=1) + 0.0001
         masked_distortion = torch.mean(err_sum / mask_size)
 
         ssims = []
@@ -217,14 +217,16 @@ class Model(nn.Module):
             x_gen_cut = (x_gen_masked[:, i][:, rows][:, :, cols]).transpose(0, 2)
             x_real_cut = (x_real_masked[:, i][:, rows][:, :, cols]).transpose(0, 2)
 
-            try:
+            if x_gen_cut.shape[0] == 0:
+                ssims.append(0)
+            else:
                 ssims.append(1 - ssim(x_gen_cut, x_real_cut, multichannel=True))
-            except Exception as e:
-                self.logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                self.logger.info(x_gen_cut.shape)
-                self.logger.info(rows)
-                self.logger.info(cols)
-                return masked_distortion
+            # except Exception as e:
+            #     self.logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+            #     self.logger.info(x_gen_cut.shape)
+            #     self.logger.info(rows)
+            #     self.logger.info(cols)
+            #     return masked_distortion
 
         ssims_lost = torch.mean(torch.Tensor(ssims))
         return masked_distortion + self.args.k_SSIM * ssims_lost
