@@ -220,7 +220,10 @@ class Model(nn.Module):
             try:
                 ssims.append(1 - ssim(x_gen_cut, x_real_cut, multichannel=True))
             except Exception as e:
-                self.logger.info(x_gen_cut.shape, x_real_cut.shape)
+                self.logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                self.logger.info(x_gen_cut.shape)
+                self.logger.info(rows)
+                self.logger.info(cols)
                 return masked_distortion
 
         ssims_lost = torch.mean(torch.Tensor(ssims))
