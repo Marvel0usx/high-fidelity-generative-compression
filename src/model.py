@@ -220,14 +220,15 @@ class Model(nn.Module):
             if x_gen_cut.shape[0] == 0:
                 ssims.append(0)
             else:
-                ssims.append(1 - ssim(x_gen_cut.detach().cpu().numpy(),
+                try:
+                    ssims.append(1 - ssim(x_gen_cut.detach().cpu().numpy(),
                                       x_real_cut.detach().cpu().numpy(), multichannel=True))
-            # except Exception as e:
-            #     self.logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-            #     self.logger.info(x_gen_cut.shape)
-            #     self.logger.info(rows)
-            #     self.logger.info(cols)
-            #     return masked_distortion
+                except Exception as e:
+                    self.logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+                    self.logger.info(x_gen_cut.shape)
+                    self.logger.info(rows)
+                    self.logger.info(cols)
+                    return masked_distortion
 
         ssims_loss = torch.mean(torch.Tensor(ssims))
         return masked_distortion + self.args.k_SSIM * ssims_loss
