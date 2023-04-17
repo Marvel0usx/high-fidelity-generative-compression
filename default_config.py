@@ -62,6 +62,7 @@ class args(object):
     k_M = 0.075 * 2**(-5)           # Distortion
     # TODO: tuning
     k_Mask = 1000
+    k_SSIM = 100
     k_P = 1.                        # Perceptual loss
     beta = 0.15                     # Generator loss
     use_channel_norm = True

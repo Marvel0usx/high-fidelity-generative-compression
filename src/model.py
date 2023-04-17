@@ -12,6 +12,9 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+# SSIM
+from skimage.metrics import structural_similarity as ssim
+
 # Custom modules
 from src import hyperprior
 from src.loss import losses
@@ -198,6 +201,25 @@ class Model(nn.Module):
         LPIPS_loss = self.perceptual_loss.forward(x_gen, x_real, normalize=normalize)
         return torch.mean(LPIPS_loss)
 
+    def masked_loss(self, x_gen, x_real, mask):
+        x_gen_masked = x_gen.transpose(0,1) * mask
+        x_real_masked = x_real.transpose(0,1) * mask
+
+        sq_err = self.squared_difference(x_gen_masked * 255., x_real_masked * 255.).transpose(0, 1)
+        err_sum = sq_err.sum(dim=3).sum(dim=2).sum(dim=1)
+        mask_size = mask.sum(dim=2).sum(dim=1)
+        masked_distortion = torch.mean(err_sum / mask_size)
+
+        ssims = []
+        for i in range(len(mask)):
+            rows = mask[i].sum(dim=1) != 0
+            cols = mask[i].sum(dim=0) != 0
+            x_gen_cut = x_gen_masked[:, i][:, rows][:, :, cols]
+            x_real_cut = x_real_masked[:, i][:, rows][:, :, cols]
+            ssims.append(1 - ssim(x_gen_cut, x_real_cut, channel_axis=0))
+        ssims_lost = torch.mean(torch.Tensor(ssims))
+        return masked_distortion + self.args.k_SSIM * ssims_lost
+
     def compression_loss(self, intermediates, hyperinfo, mask):
         
         x_real = intermediates.input_image
@@ -210,10 +232,9 @@ class Model(nn.Module):
 
         distortion_loss = self.distortion_loss(x_gen, x_real)
         perceptual_loss = self.perceptual_loss_wrapper(x_gen, x_real, normalize=True)
-        mask_distortion = self.distortion_loss(x_gen.transpose(0,1) * mask, x_real.transpose(0,1) * mask)
 
+        mask_distortion = self.masked_loss(x_gen, x_real, mask)
 
-        # TODO: args.k_M?
         weighted_distortion = self.args.k_M * distortion_loss + self.args.k_Mask * self.args.k_M * mask_distortion
         weighted_perceptual = self.args.k_P * perceptual_loss
 
