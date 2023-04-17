@@ -220,7 +220,7 @@ class Model(nn.Module):
             if x_gen_cut.shape[0] == 0:
                 ssims.append(0)
             else:
-                ssims.append(1 - ssim(x_gen_cut, x_real_cut, multichannel=True))
+                ssims.append(1 - ssim(x_gen_cut.numpy(), x_real_cut.numpy(), multichannel=True))
             # except Exception as e:
             #     self.logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             #     self.logger.info(x_gen_cut.shape)
@@ -228,8 +228,8 @@ class Model(nn.Module):
             #     self.logger.info(cols)
             #     return masked_distortion
 
-        ssims_lost = torch.mean(torch.Tensor(ssims))
-        return masked_distortion + self.args.k_SSIM * ssims_lost
+        ssims_loss = torch.mean(torch.Tensor(ssims))
+        return masked_distortion + self.args.k_SSIM * ssims_loss
 
     def compression_loss(self, intermediates, hyperinfo, mask):
         
