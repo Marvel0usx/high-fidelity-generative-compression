@@ -88,6 +88,8 @@ def test(args, model, epoch, idx, data, test_data, test_mask, test_bpp, device, 
 
 
 def train(args, model, train_loader, test_loader, device, logger, optimizers):
+    # for plot
+    loss_list = []
 
     start_time = time.time()
     test_loader_iter = iter(test_loader)
@@ -138,6 +140,7 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
                 else:
                     # Rate, distortion, perceptual only
                     losses = model(data, mask, train_generator=True)
+                    loss_list.append(losses)
                     compression_loss = losses['compression']
                     optimize_compression_loss(compression_loss, amortization_opt, hyperlatent_likelihood_opt)
 
@@ -200,7 +203,11 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
     ckpt_path = utils.save_model(model, optimizers, mean_epoch_loss, epoch, device, args=args, logger=logger)
     args.ckpt = ckpt_path
     logger.info("Training complete. Time elapsed: {:.3f} s. Number of steps: {}".format((time.time()-start_time), model.step_counter))
-    
+
+    import pickle
+    with open("\kaggle\working\loss.pickle", "wb") as fout:
+        pickle.dump(loss_list, fout)
+
     return model, ckpt_path
 
 
