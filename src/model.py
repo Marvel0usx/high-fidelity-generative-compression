@@ -220,7 +220,7 @@ class Model(nn.Module):
             if x_gen_cut.shape[0] == 0:
                 ssims.append(0)
             else:
-                ssims.append(1 - ssim(x_gen_cut.numpy(), x_real_cut.numpy(), multichannel=True))
+                ssims.append(1 - ssim(x_gen_cut.cpu().numpy(), x_real_cut.cpu().numpy(), multichannel=True))
             # except Exception as e:
             #     self.logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             #     self.logger.info(x_gen_cut.shape)
