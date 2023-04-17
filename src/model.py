@@ -214,7 +214,7 @@ class Model(nn.Module):
 
 
         # TODO: args.k_M?
-        weighted_distortion = self.args.k_M * distortion_loss + 10 * self.args.k_M * mask_distortion
+        weighted_distortion = self.args.k_M * distortion_loss + self.args.k_Mask * self.args.k_M * mask_distortion
         weighted_perceptual = self.args.k_P * perceptual_loss
 
         weighted_rate, rate_penalty = losses.weighted_rate_loss(self.args, total_nbpp=intermediates.n_bpp,

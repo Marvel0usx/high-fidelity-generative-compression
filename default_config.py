@@ -60,6 +60,7 @@ class args(object):
     n_residual_blocks = 9           # Authors use 9 blocks, performance saturates at 5
     lambda_B = 2**(-4)              # Loose rate
     k_M = 0.075 * 2**(-5)           # Distortion
+    k_Mask = 10
     k_P = 1.                        # Perceptual loss
     beta = 0.15                     # Generator loss
     use_channel_norm = True
