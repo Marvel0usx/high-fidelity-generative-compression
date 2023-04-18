@@ -215,8 +215,8 @@ class Model(nn.Module):
         for i in range(len(mask)):
             rows = mask[i].sum(dim=1) != 0
             cols = mask[i].sum(dim=0) != 0
-            x_gen_cut = (x_gen_masked[:, i][:, rows][:, :, cols]).transpose(0, 2)
-            x_real_cut = (x_real_masked[:, i][:, rows][:, :, cols]).transpose(0, 2)
+            x_gen_cut = (x_gen_masked[:, i][:, rows][:, :, cols]).unsqeeze(0)
+            x_real_cut = (x_real_masked[:, i][:, rows][:, :, cols]).unsqeeze(0)
 
             if x_gen_cut.shape[0] == 0:
                 ssims.append(0)
