@@ -505,6 +505,7 @@ class WIDERFACE(BaseDataset):
     files = {
         "train": "train/train",
         "val"  : "val/val",
+        "test" : "",
         "bbox" : "wider_face_bbox.pickle"
     }
     def __init__(self, root=r"/kaggle/input/widerface/", mode="train", crop_size=256,
