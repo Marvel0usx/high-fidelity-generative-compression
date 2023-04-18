@@ -21,12 +21,14 @@ class Datasets(object):
     CITYSCAPES = 'cityscapes'
     JETS = 'jetimages'
     MSCOCO2017 = 'mscoco2017'
+    WIDERFACE = 'widerface'
 
 class DatasetPaths(object):
     OPENIMAGES = ''
     CITYSCAPES = ''
     JETS = ''
     MSCOCO2017 = "/kaggle/input/coco-2017-dataset/coco2017"
+    WIDERFACE = "/kaggle/input/widerface/"
     # MSCOCO2017 = r"D:\UofT\CSC413\Project\mscoco"
 
 class directories(object):
@@ -45,8 +47,8 @@ class args(object):
     save_interval = 50000
     gpu = 0
     multigpu = True
-    dataset = Datasets.MSCOCO2017
-    dataset_path = DatasetPaths.MSCOCO2017
+    dataset = Datasets.WIDERFACE
+    dataset_path = DatasetPaths.WIDERFACE
     shuffle = True
 
     # GAN params
@@ -61,8 +63,8 @@ class args(object):
     lambda_B = 2**(-4)              # Loose rate
     k_M = 0.075 * 2**(-5)           # Distortion
     # TODO: tuning
-    k_Mask = 1000
-    k_SSIM = 100
+    k_Mask = 888
+    k_SSIM = 32
     SSIM_Window = 11
     k_P = 1.                        # Perceptual loss
     beta = 0.15                     # Generator loss
