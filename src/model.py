@@ -222,7 +222,9 @@ class Model(nn.Module):
                 ssims.append(0)
             else:
                 # try:
-                ssims.append(1 - ssim(x_gen_cut, x_real_cut, window_size=self.args.SSIM_Window, reduction='mean'))
+                ssims.append(1 - ssim(x_gen_cut, x_real_cut,
+                                      window_size=min(self.args.SSIM_Window, x_gen_cut.shape[2], x_gen_cut.shape[3]),
+                                      reduction='mean'))
                 # ssims.append(1 - ssim(x_gen_cut.detach().cpu().numpy(),
                 #                           x_real_cut.detach().cpu().numpy(), multichannel=True))
                 # except Exception as e:
