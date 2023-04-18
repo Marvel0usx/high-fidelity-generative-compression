@@ -226,7 +226,7 @@ class Model(nn.Module):
                 if x_dim % 2 == 0:
                     x_dim -= 1
                 ssims.append(1 - ssim(x_gen_cut, x_real_cut,
-                                      window_size=min(self.args.SSIM_Window, x_gen_cut.shape[2], x_gen_cut.shape[3]),
+                                      window_size=min(self.args.SSIM_Window, x_dim),
                                       reduction='mean'))
                 # ssims.append(1 - ssim(x_gen_cut.detach().cpu().numpy(),
                 #                           x_real_cut.detach().cpu().numpy(), multichannel=True))
