@@ -14,6 +14,8 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, datasets
 
+import scipy.io
+
 DIR = os.path.abspath(os.path.dirname(__file__))
 COLOUR_BLACK = 0
 COLOUR_WHITE = 1
@@ -22,6 +24,7 @@ SCALE_MIN = 0.75
 SCALE_MAX = 0.95
 DATASETS_DICT = {"openimages": "OpenImages", "cityscapes": "CityScapes", 
                  "jetimages": "JetImages", "evaluation": "Evaluation",
+                 "widerface": "WIDERFACE",
                  "mscoco2017": "MSCOCO2017"}
 DATASETS = list(DATASETS_DICT.keys())
 
@@ -369,6 +372,174 @@ class MSCOCO2017(BaseDataset):
                 else:
                     self.bbox_dict[f_name] = [coord]
 
+        self.imgs = glob.glob(os.path.join(data_dir, '*.jpg'))
+        self.imgs += glob.glob(os.path.join(data_dir, '*.png'))
+
+        self.crop_size = crop_size
+        self.image_dims = (3, self.crop_size, self.crop_size)
+        self.scale_min = SCALE_MIN
+        self.scale_max = SCALE_MAX
+        self.normalize = normalize
+
+    def _transforms(self, scale, H, W):
+        """
+        Up(down)scale and randomly crop to `crop_size` x `crop_size`
+
+        For fine-tuning this model for human faces, we retrieve bounding box information
+        by the index of the image, randomly select a bounding box, and crop around the
+        center of that bbox.
+        """
+
+        transforms_list = [  # transforms.ToPILImage(),
+            transforms.RandomHorizontalFlip(),
+            transforms.Resize((math.ceil(scale * H), math.ceil(scale * W))),
+            transforms.RandomCrop(self.crop_size),
+            transforms.ToTensor()]
+
+        if self.normalize is True:
+            transforms_list += [transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+
+        return transforms.Compose(transforms_list)
+
+    def __getitem__(self, idx):
+        """ TODO: This definitely needs to be optimized.
+        Get the image of `idx`
+
+        Return
+        ------
+        sample : torch.Tensor
+            Tensor in [0.,1.] of shape `img_size`.
+
+        roi_mask : torch.Tensor
+            Tensor in bool, the Region of Interest.
+
+        For fine-tuning this model for human faces, we retrieve bounding box information
+        by the index of the image, randomly select a bounding box, and crop around the
+        center of that bbox.
+        """
+
+        # img values already between 0 and 255
+        img_path = self.imgs[idx]
+        img_name = os.path.basename(img_path)
+        filesize = os.path.getsize(img_path)
+        try:
+            # This is faster but less convenient
+            # H X W X C `ndarray`
+            # img = imread(img_path)
+            # img_dims = img.shape
+            # H, W = img_dims[0], img_dims[1]
+            # PIL
+            img = PIL.Image.open(img_path)
+            img = img.convert('RGB')
+            W, H = img.size  # slightly confusing
+            bpp = filesize * 8. / (H * W)
+
+            shortest_side_length = min(H, W)
+
+            minimum_scale_factor = float(self.crop_size) / float(shortest_side_length)
+            scale_low = max(minimum_scale_factor, self.scale_min)
+            scale_high = max(scale_low, self.scale_max)
+            scale = np.random.uniform(scale_low, scale_high)
+
+            if img_name in self.bbox_dict:
+                scaled_W, scaled_H = math.ceil(W * scale), math.ceil(H * scale)
+                bbox = torch.tensor(self.bbox_dict[img_name])
+                mask = torch.zeros((scaled_H, scaled_W))
+
+                # random scale and convert img to tensor.
+                transform = [
+                    transforms.Resize((scaled_H, scaled_W)),
+                    transforms.ToTensor()
+                ]
+                if self.normalize:
+                    transform.append(transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)))
+
+                img = transforms.Compose(transform)(img)
+                # scale x-coord of bbox
+                bbox[:, (0, 2)] *= scaled_W
+                # scale y-coord of bbox
+                bbox[:, (1, 3)] *= scaled_H
+
+                # (x1, y1) upper-left corner of face rectangle, (x2, y2) - lower-right corner
+                for (x1, y1, x2, y2) in bbox:
+                    mask[int(x1): int(x2), int(y1): int(y2)] = 1
+
+                # random horizontal flip with p=0.5
+                if random.random() <= 0.5:
+                    img = torch.flip(img, dims=(2,))
+                    mask = torch.flip(mask, dims=(1,))
+
+                # random crop the image, does not go over the picture dims.
+                start_x, start_y = random.randint(0, scaled_H - self.crop_size), \
+                                   random.randint(0, scaled_W - self.crop_size)
+                end_x, end_y = start_x + self.crop_size, start_y + self.crop_size
+
+
+                # print(f"start and end {img_path} :{start_x}, {start_y}, {end_x}, {end_y}\n")
+
+                transformed = img[:, start_x:end_x, start_y:end_y]
+                mask = mask[start_x:end_x, start_y:end_y]
+            else:  # no ROI, do the normal transform.
+                dynamic_transform = self._transforms(scale, H, W)
+                transformed = dynamic_transform(img)
+                mask = torch.zeros((self.crop_size, self.crop_size))
+
+        except Exception as e:
+            print("*" * 60)
+            print(e)
+            print("*" * 60)
+            return None
+
+        # apply random scaling + crop, put each pixel
+        # in [0.,1.] and reshape to (C x H x W)
+        return transformed, bpp, mask
+
+
+class WIDERFACE(BaseDataset):
+    """
+    Face detection dataset with labelled bounding boxes.
+
+    http://shuoyang1213.me/WIDERFACE/index.html
+    """
+    files = {
+        "train": "train",
+        "test" : "test",
+        "val"  : "val",
+        "bbox" : r""
+        # "bbox" : r"D:\\UofT\\CSC413\\Project\\coco-faces\\"
+    }
+    def __init__(self, root=r"/kaggle/input/", mode="train", crop_size=256,
+                    normalize=False, **kwargs):
+        super().__init__(root, [transforms.ToTensor()], **kwargs)
+
+        if mode == 'train':
+            data_dir = self.train_data
+            self.bbox_file = self.files["bbox"] + r"wider_face_train.mat"
+        elif mode == 'validation':
+            data_dir = self.val_data
+            self.bbox_file = self.files["bbox"] + r"wider_face_val.mat"
+        else:
+            raise ValueError('Unknown mode!')
+
+        # Parse bounding box data from file.
+        bbox_mat = scipy.io.loadmat(self.bbox_file)
+
+        self.bbox_dict = dict()
+        mat = scipy.io.loadmat(file_path)
+
+        for i in range(len(mat['event_list'])):
+            event = mat['event_list'][i,0][0]
+            for j in range(len(mat['file_list'][i,0])):
+                file = mat['file_list'][i,0][j,0][0]
+                filename = "{}.jpg".format(file)
+                filepath = os.path.join(data_dir, event, filename)
+                # bounding boxes (x,y,w,h)
+                bboxs = mat['face_bbx_list'][i,0][j,0]
+                # convert from (x, y, w, h) to (x1, y1, x2, y2)
+                bboxs[:,2:4] = bboxs[:,2:4] + bboxs[:,0:2]
+
+                self.bbox_dict[filepath] = bboxs.astype(np.int)
+            
         self.imgs = glob.glob(os.path.join(data_dir, '*.jpg'))
         self.imgs += glob.glob(os.path.join(data_dir, '*.png'))
 
