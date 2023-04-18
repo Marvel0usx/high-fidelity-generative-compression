@@ -13,7 +13,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 # SSIM
-from skimage.metrics import structural_similarity as ssim
+# from skimage.metrics import structural_similarity as ssim
+from torchgeometry.losses import ssim
 
 # Custom modules
 from src import hyperprior
@@ -221,8 +222,9 @@ class Model(nn.Module):
                 ssims.append(0)
             else:
                 # try:
-                ssims.append(1 - ssim(x_gen_cut.detach().cpu().numpy(),
-                                          x_real_cut.detach().cpu().numpy(), multichannel=True))
+                ssims.append(1 - ssim(x_gen_cut, x_real_cut, window_size=self.args.SSIM_Window, reduction='mean'))
+                # ssims.append(1 - ssim(x_gen_cut.detach().cpu().numpy(),
+                #                           x_real_cut.detach().cpu().numpy(), multichannel=True))
                 # except Exception as e:
                 #     self.logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
                 #     self.logger.info(x_gen_cut.shape)
