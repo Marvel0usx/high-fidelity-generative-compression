@@ -43,12 +43,12 @@ class args(object):
     n_epochs = 8
     n_steps = 1
     batch_size = 8
-    log_interval = 1024
+    log_interval = 2048
     save_interval = 50000
     gpu = 0
     multigpu = True
-    dataset = Datasets.WIDERFACE
-    dataset_path = DatasetPaths.WIDERFACE
+    dataset = Datasets.MSCOCO2017
+    dataset_path = DatasetPaths.MSCOCO2017
     shuffle = True
 
     # GAN params
