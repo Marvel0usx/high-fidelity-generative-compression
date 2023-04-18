@@ -122,7 +122,7 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
                 if model.use_discriminator is True:
                     # Train D for D_steps, then G, using distinct batches
                     losses = model(data, mask, train_generator=train_generator)
-                    loss_list.append(losses)
+                    # loss_list.append(losses)
                     compression_loss = losses['compression']
                     disc_loss = losses['disc']
 
