@@ -218,10 +218,13 @@ class Model(nn.Module):
             x_gen_cut = (x_gen_masked[:, i][:, rows][:, :, cols]).unsqueeze(0)
             x_real_cut = (x_real_masked[:, i][:, rows][:, :, cols]).unsqueeze(0)
 
-            if x_gen_cut.shape[0] == 0:
+            x_dim = min(x_gen_cut.shape[2], x_gen_cut.shape[3])
+            if x_dim == 0:
                 ssims.append(0)
             else:
                 # try:
+                if x_dim % 2 == 0:
+                    x_dim -= 1
                 ssims.append(1 - ssim(x_gen_cut, x_real_cut,
                                       window_size=min(self.args.SSIM_Window, x_gen_cut.shape[2], x_gen_cut.shape[3]),
                                       reduction='mean'))
