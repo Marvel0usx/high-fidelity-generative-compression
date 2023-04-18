@@ -211,23 +211,23 @@ class Model(nn.Module):
         mask_size = mask.sum(dim=2).sum(dim=1) + 0.0001
         masked_distortion = torch.mean(err_sum / mask_size)
 
-        # ssims = []
-        # for i in range(len(mask)):
-        #     rows = mask[i].sum(dim=1) != 0
-        #     cols = mask[i].sum(dim=0) != 0
-        #     x_gen_cut = (x_gen_masked[:, i][:, rows][:, :, cols]).unsqueeze(0)
-        #     x_real_cut = (x_real_masked[:, i][:, rows][:, :, cols]).unsqueeze(0)
-        #
-        #     x_dim = min(x_gen_cut.shape[2], x_gen_cut.shape[3])
-        #     if x_dim == 0:
-        #         ssims.append(0)
-        #     else:
-        #         # try:
-        #         if x_dim % 2 == 0:
-        #             x_dim -= 1
-        #         ssims.append(1 - ssim(x_gen_cut, x_real_cut,
-        #                               window_size=min(self.args.SSIM_Window, x_gen_cut.shape[2], x_gen_cut.shape[3]),
-        #                               reduction='mean'))
+        ssims = []
+        for i in range(len(mask)):
+            rows = mask[i].sum(dim=1) != 0
+            cols = mask[i].sum(dim=0) != 0
+            x_gen_cut = (x_gen_masked[:, i][:, rows][:, :, cols]).unsqueeze(0)
+            x_real_cut = (x_real_masked[:, i][:, rows][:, :, cols]).unsqueeze(0)
+
+            x_dim = min(x_gen_cut.shape[2], x_gen_cut.shape[3])
+            if x_dim == 0:
+                ssims.append(0)
+            else:
+                # try:
+                if x_dim % 2 == 0:
+                    x_dim -= 1
+                ssims.append(1 - ssim(x_gen_cut, x_real_cut,
+                                      window_size=min(self.args.SSIM_Window, x_gen_cut.shape[2], x_gen_cut.shape[3]),
+                                      reduction='mean'))
                 # ssims.append(1 - ssim(x_gen_cut.detach().cpu().numpy(),
                 #                           x_real_cut.detach().cpu().numpy(), multichannel=True))
                 # except Exception as e:
@@ -237,8 +237,7 @@ class Model(nn.Module):
                 #     self.logger.info(cols.sum())
                 #     return masked_distortion
 
-        # ssims_loss = torch.mean(torch.Tensor(ssims))
-        ssims_loss = 0
+        ssims_loss = torch.mean(torch.Tensor(ssims))
         return masked_distortion + self.args.k_SSIM * ssims_loss
 
     def compression_loss(self, intermediates, hyperinfo, mask):
@@ -254,8 +253,8 @@ class Model(nn.Module):
         distortion_loss = self.distortion_loss(x_gen, x_real)
         perceptual_loss = self.perceptual_loss_wrapper(x_gen, x_real, normalize=True)
 
-        # mask_distortion = self.masked_loss(x_gen, x_real, mask)
-        mask_distortion = self.distortion_loss(x_gen.transpose(0, 1) * mask, x_real.transpose(0, 1) * mask)
+        mask_distortion = self.masked_loss(x_gen, x_real, mask)
+        # mask_distortion = self.distortion_loss(x_gen.transpose(0, 1) * mask, x_real.transpose(0, 1) * mask)
 
         weighted_distortion = self.args.k_M * distortion_loss + self.args.k_Mask * self.args.k_M * mask_distortion
         weighted_perceptual = self.args.k_P * perceptual_loss
