@@ -5,6 +5,7 @@ import math
 import logging
 import numpy as np
 import random
+import pickle
 
 from skimage.io import imread
 import PIL
@@ -502,46 +503,28 @@ class WIDERFACE(BaseDataset):
     http://shuoyang1213.me/WIDERFACE/index.html
     """
     files = {
-        "train": "train",
-        "test" : "test",
-        "val"  : "val",
-        "bbox" : r""
-        # "bbox" : r"D:\\UofT\\CSC413\\Project\\coco-faces\\"
+        "train": "train/train",
+        "val"  : "val/val",
+        "bbox" : "wider_face_bbox.pickle"
     }
-    def __init__(self, root=r"/kaggle/input/", mode="train", crop_size=256,
+    def __init__(self, root=r"/kaggle/input/widerface/", mode="train", crop_size=256,
                     normalize=False, **kwargs):
         super().__init__(root, [transforms.ToTensor()], **kwargs)
 
         if mode == 'train':
             data_dir = self.train_data
-            self.bbox_file = self.files["bbox"] + r"wider_face_train.mat"
+            bbox_file = root + self.files["bbox"]
         elif mode == 'validation':
             data_dir = self.val_data
-            self.bbox_file = self.files["bbox"] + r"wider_face_val.mat"
+            bbox_file = root + self.files["bbox"]
         else:
             raise ValueError('Unknown mode!')
 
-        # Parse bounding box data from file.
-        bbox_mat = scipy.io.loadmat(self.bbox_file)
+        # Load parsed bounding box from pickle file.
+        with open(bbox_file, "rb") as fin:
+            self.bbox_dict = pickle.load(fin)
 
-        self.bbox_dict = dict()
-        mat = scipy.io.loadmat(file_path)
-
-        for i in range(len(mat['event_list'])):
-            event = mat['event_list'][i,0][0]
-            for j in range(len(mat['file_list'][i,0])):
-                file = mat['file_list'][i,0][j,0][0]
-                filename = "{}.jpg".format(file)
-                filepath = os.path.join(data_dir, event, filename)
-                # bounding boxes (x,y,w,h)
-                bboxs = mat['face_bbx_list'][i,0][j,0]
-                # convert from (x, y, w, h) to (x1, y1, x2, y2)
-                bboxs[:,2:4] = bboxs[:,2:4] + bboxs[:,0:2]
-
-                self.bbox_dict[filepath] = bboxs.astype(np.int)
-            
         self.imgs = glob.glob(os.path.join(data_dir, '*.jpg'))
-        self.imgs += glob.glob(os.path.join(data_dir, '*.png'))
 
         self.crop_size = crop_size
         self.image_dims = (3, self.crop_size, self.crop_size)
