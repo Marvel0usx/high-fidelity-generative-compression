@@ -254,7 +254,8 @@ class Model(nn.Module):
         distortion_loss = self.distortion_loss(x_gen, x_real)
         perceptual_loss = self.perceptual_loss_wrapper(x_gen, x_real, normalize=True)
 
-        mask_distortion = self.masked_loss(x_gen, x_real, mask)
+        # mask_distortion = self.masked_loss(x_gen, x_real, mask)
+        mask_distortion = self.distortion_loss(x_gen.transpose(0, 1) * mask, x_real.transpose(0, 1) * mask)
 
         weighted_distortion = self.args.k_M * distortion_loss + self.args.k_Mask * self.args.k_M * mask_distortion
         weighted_perceptual = self.args.k_P * perceptual_loss
