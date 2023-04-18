@@ -258,6 +258,12 @@ if __name__ == '__main__':
     warmstart_args.add_argument("-warmstart", "--warmstart", help="Warmstart adversarial training from autoencoder + hyperprior ckpt.", action="store_true")
     warmstart_args.add_argument("-ckpt", "--warmstart_ckpt", default=None, help="Path to autoencoder + hyperprior ckpt.")
 
+    # Loss Hyperparameters
+    general.add_argument("-ssim", "--k_SSIM", type=float,
+            default=hific_args.k_SSIM, help="Coefficient for SSIM loss.")
+    general.add_argument("-mask", "--k_Mask", type=float,
+            default=hific_args.k_Mask, help="Coefficient for content-aware MSE.")
+
     cmd_args = parser.parse_args()
 
     if (cmd_args.gpu != 0) or (cmd_args.force_set_gpu is True):
