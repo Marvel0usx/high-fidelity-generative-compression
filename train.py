@@ -263,6 +263,8 @@ if __name__ == '__main__':
             default=hific_args.k_SSIM, help="Coefficient for SSIM loss.")
     general.add_argument("-mask", "--k_Mask", type=float,
             default=hific_args.k_Mask, help="Coefficient for content-aware MSE.")
+    general.add_argument("-perc", "--k_MaPe", type=float,
+            default=hific_args.k_MaPe, help="Coefficient for content-aware Perception.")
 
     cmd_args = parser.parse_args()
 

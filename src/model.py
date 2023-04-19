@@ -209,7 +209,7 @@ class Model(nn.Module):
         sq_err = self.squared_difference(x_gen_masked * 255., x_real_masked * 255.).transpose(0, 1)
         err_sum = sq_err.sum(dim=3).sum(dim=2).sum(dim=1)
         mask_size = mask.sum(dim=2).sum(dim=1) + 0.0001
-        masked_distortion = torch.mean(err_sum / mask_size)
+        masked_distortion = self.args.k_Mask * torch.mean(err_sum / mask_size)
 
         ssims = []
         for i in range(len(mask)):
@@ -228,17 +228,11 @@ class Model(nn.Module):
                 ssims.append(1 - ssim(x_gen_cut, x_real_cut,
                                       window_size=min(self.args.SSIM_Window, x_dim),
                                       reduction='mean'))
-                # ssims.append(1 - ssim(x_gen_cut.detach().cpu().numpy(),
-                #                           x_real_cut.detach().cpu().numpy(), multichannel=True))
-                # except Exception as e:
-                #     self.logger.info("AAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-                #     self.logger.info(x_gen_cut.shape)
-                #     self.logger.info(rows.sum())
-                #     self.logger.info(cols.sum())
-                #     return masked_distortion
+        ssims_loss = self.args.k_SSIM * torch.mean(torch.Tensor(ssims))
 
-        ssims_loss = torch.mean(torch.Tensor(ssims))
-        return masked_distortion + self.args.k_SSIM * ssims_loss
+        perce_loss = self.args.k_MaPe * self.perceptual_loss_wrapper(x_gen_masked.transpose(0, 1),
+                                                                     x_real_masked.transpose(0, 1))
+        return masked_distortion + ssims_loss + perce_loss
 
     def compression_loss(self, intermediates, hyperinfo, mask):
         
@@ -256,7 +250,7 @@ class Model(nn.Module):
         mask_distortion = self.masked_loss(x_gen, x_real, mask)
         # mask_distortion = self.distortion_loss(x_gen.transpose(0, 1) * mask, x_real.transpose(0, 1) * mask)
 
-        weighted_distortion = self.args.k_M * distortion_loss + self.args.k_Mask * self.args.k_M * mask_distortion
+        weighted_distortion = self.args.k_M * distortion_loss + mask_distortion
         weighted_perceptual = self.args.k_P * perceptual_loss
 
         weighted_rate, rate_penalty = losses.weighted_rate_loss(self.args, total_nbpp=intermediates.n_bpp,
