@@ -206,7 +206,7 @@ def train(args, model, train_loader, test_loader, device, logger, optimizers):
     logger.info("Training complete. Time elapsed: {:.3f} s. Number of steps: {}".format((time.time()-start_time), model.step_counter))
 
     try:
-        with open("\kaggle\working\loss.pickle", "wb") as fout:
+        with open("/kaggle/working/loss.pickle", "wb") as fout:
             pickle.dump(loss_list, fout)
     except Exception as e:
         print("CNM!")
