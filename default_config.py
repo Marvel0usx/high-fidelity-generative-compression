@@ -21,12 +21,14 @@ class Datasets(object):
     CITYSCAPES = 'cityscapes'
     JETS = 'jetimages'
     MSCOCO2017 = 'mscoco2017'
+    WIDERFACE = 'widerface'
 
 class DatasetPaths(object):
     OPENIMAGES = ''
     CITYSCAPES = ''
     JETS = ''
     MSCOCO2017 = "/kaggle/input/coco-2017-dataset/coco2017"
+    WIDERFACE = "/kaggle/input/widerface/"
     # MSCOCO2017 = r"D:\UofT\CSC413\Project\mscoco"
 
 class directories(object):
@@ -41,7 +43,7 @@ class args(object):
     n_epochs = 8
     n_steps = 1
     batch_size = 8
-    log_interval = 1024
+    log_interval = 2048
     save_interval = 50000
     gpu = 0
     multigpu = True
