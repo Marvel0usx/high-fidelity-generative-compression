@@ -209,7 +209,7 @@ class Model(nn.Module):
         sq_err = self.squared_difference(x_gen_masked * 255., x_real_masked * 255.).transpose(0, 1)
         err_sum = sq_err.sum(dim=3).sum(dim=2).sum(dim=1)
         mask_size = mask.sum(dim=2).sum(dim=1) + 0.0001
-        masked_distortion = self.k_Mask * torch.mean(err_sum / mask_size)
+        masked_distortion = self.args.k_Mask * torch.mean(err_sum / mask_size)
 
         ssims = []
         for i in range(len(mask)):
